@@ -1,3 +1,5 @@
+## 📄 License
+Copyright © Ahmed Mohamed Khairy. All rights reserved.
 # 🚀 Financial Advisor App
 ### AI-Powered Investment Strategy & Forecasting Tool
 
