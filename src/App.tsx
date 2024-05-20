@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { FinancialFormData, LossReaction } from './types';
+import { CopyrightHeader } from './components/CopyrightHeader';
+import { FooterDisclaimer } from './components/FooterDisclaimer';
+import { TrafficLight } from './components/TrafficLight';
+import { FinancialFormData, LossReaction, FeasibilityStatus } from './types';
 
 // Initial state for the form
 const initialFormData: FinancialFormData = {
@@ -31,66 +34,124 @@ const initialFormData: FinancialFormData = {
 
 const App: React.FC = () => {
     const [formData, setFormData] = useState<FinancialFormData>(initialFormData);
+    const [selectedStatus, setSelectedStatus] = useState<FeasibilityStatus>(FeasibilityStatus.GREEN);
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-            <div className="text-center max-w-2xl">
-                <h1 className="text-4xl font-bold text-slate-900 mb-4">
-                    Financial Advisor App
-                </h1>
-                <p className="text-slate-600 text-lg mb-8">
-                    AI-Powered Investment Strategy & Forecasting
-                </p>
+        <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-800">
+            <CopyrightHeader />
 
-                <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-6">
-                        Phase 3: TypeScript Types Complete! ✅
+            <main className="flex-grow container mx-auto px-4 py-8 max-w-3xl">
+                <div className="text-center mb-10">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-2">
+                        Financial Advisor
+                    </h1>
+                    <p className="text-slate-600">Advanced AI-Powered Investment Strategy & Forecasting</p>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 p-8">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">
+                        Phase 4: Core Components Complete! ✅
                     </h2>
 
-                    <div className="space-y-4 text-left">
-                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                            <h3 className="font-semibold text-green-800">✅ TypeScript Types Created:</h3>
-                            <ul className="list-disc pl-5 mt-2 text-green-700">
-                                <li><code>FinancialFormData</code> - Complete form structure</li>
-                                <li><code>AIAnalysisResult</code> - AI response format</li>
-                                <li><code>FeasibilityStatus</code> - RED/YELLOW/GREEN enums</li>
-                                <li><code>LossReaction</code> - User risk psychology</li>
-                                <li><code>DebtOptions</code> - Debt level choices</li>
-                            </ul>
-                        </div>
+                    {/* Component Demos */}
+                    <div className="space-y-8">
 
-                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <h3 className="font-semibold text-blue-800">📊 Form Data Preview:</h3>
-                            <div className="mt-2 space-y-2 text-blue-700">
-                                <div className="flex justify-between">
-                                    <span>Age:</span>
-                                    <span className="font-semibold">{formData.age}</span>
+                        {/* Traffic Light Demo */}
+                        <div className="border border-slate-200 rounded-xl p-6">
+                            <h3 className="text-lg font-semibold text-slate-700 mb-4">🚦 Traffic Light Component</h3>
+                            <div className="flex flex-wrap items-center justify-center gap-8">
+                                <div className="text-center">
+                                    <TrafficLight status={FeasibilityStatus.RED} />
+                                    <p className="mt-2 text-sm text-red-600 font-medium">RED - Unrealistic</p>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Currency:</span>
-                                    <span className="font-semibold">{formData.currency}</span>
+                                <div className="text-center">
+                                    <TrafficLight status={FeasibilityStatus.YELLOW} />
+                                    <p className="mt-2 text-sm text-yellow-600 font-medium">YELLOW - Challenging</p>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Risk Reaction:</span>
-                                    <span className="font-semibold">{formData.reactionToLoss}</span>
+                                <div className="text-center">
+                                    <TrafficLight status={FeasibilityStatus.GREEN} />
+                                    <p className="mt-2 text-sm text-green-600 font-medium">GREEN - On Track</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 text-center">
+                                <p className="text-slate-600 text-sm">Interactive Demo:</p>
+                                <div className="flex justify-center gap-4 mt-2">
+                                    <button
+                                        onClick={() => setSelectedStatus(FeasibilityStatus.RED)}
+                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                    >
+                                        Set RED
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedStatus(FeasibilityStatus.YELLOW)}
+                                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                                    >
+                                        Set YELLOW
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedStatus(FeasibilityStatus.GREEN)}
+                                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                    >
+                                        Set GREEN
+                                    </button>
+                                </div>
+                                <div className="mt-4">
+                                    <p className="text-slate-700">Current Status: <span className="font-bold">{selectedStatus}</span></p>
+                                    <TrafficLight status={selectedStatus} />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                            <h3 className="font-semibold text-purple-800">🚀 Next Phase:</h3>
-                            <p className="text-purple-700 mt-2">
-                                Phase 4: Core Layout Components (CopyrightHeader, FooterDisclaimer, TrafficLight)
+                        {/* Form Data Preview */}
+                        <div className="border border-slate-200 rounded-xl p-6">
+                            <h3 className="text-lg font-semibold text-slate-700 mb-4">📊 Current Form Data</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div className="bg-slate-50 p-3 rounded-lg">
+                                    <p className="text-sm text-slate-500">Age</p>
+                                    <p className="font-semibold">{formData.age}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-lg">
+                                    <p className="text-sm text-slate-500">Currency</p>
+                                    <p className="font-semibold">{formData.currency}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-lg">
+                                    <p className="text-sm text-slate-500">Knowledge Level</p>
+                                    <p className="font-semibold">{formData.investmentKnowledge}/10</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-lg">
+                                    <p className="text-sm text-slate-500">Risk Reaction</p>
+                                    <p className="font-semibold text-sm">{formData.reactionToLoss}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-lg">
+                                    <p className="text-sm text-slate-500">Target Return</p>
+                                    <p className="font-semibold">{formData.targetAnnualReturn}%</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-lg">
+                                    <p className="text-sm text-slate-500">Max Loss Tolerance</p>
+                                    <p className="font-semibold">{formData.maxTolerableLoss}%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Next Phase Info */}
+                        <div className="border border-blue-200 bg-blue-50 rounded-xl p-6">
+                            <h3 className="text-lg font-semibold text-blue-800 mb-2">🚀 Next Phase: Multi-Step Form</h3>
+                            <p className="text-blue-700">
+                                Phase 5: We'll build the multi-step financial form with 4 steps:
                             </p>
+                            <ul className="list-disc pl-5 mt-2 text-blue-700">
+                                <li>Step 1: Basic Profile & Demographics</li>
+                                <li>Step 2: Financial Health Check</li>
+                                <li>Step 3: Goals & Aspirations</li>
+                                <li>Step 4: Risk Profile & Context</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
 
-            <footer className="mt-12 text-sm text-slate-500">
-                <p>Copyright © Ahmed Mohamed Khairy. All rights reserved.</p>
-                <p className="text-xs mt-1">Phase 3: TypeScript Types & Data Models</p>
-            </footer>
+            <FooterDisclaimer />
         </div>
     );
 };
