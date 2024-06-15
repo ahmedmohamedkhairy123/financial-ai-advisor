@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { CopyrightHeader } from './components/CopyrightHeader';
 import { FooterDisclaimer } from './components/FooterDisclaimer';
-import { TrafficLight } from './components/TrafficLight';
-import { FinancialFormData, LossReaction, FeasibilityStatus } from './types';
+import { FinancialFormData, LossReaction } from './types';
 
-// Initial state for the form
+// Initial state for the form - EXACTLY like your original
 const initialFormData: FinancialFormData = {
     age: 30,
     country: '',
@@ -32,9 +31,146 @@ const initialFormData: FinancialFormData = {
     additionalContext: '',
 };
 
+const housingOptions = ["Homeowner", "Renting", "Living with family"];
+
 const App: React.FC = () => {
     const [formData, setFormData] = useState<FinancialFormData>(initialFormData);
-    const [selectedStatus, setSelectedStatus] = useState<FeasibilityStatus>(FeasibilityStatus.GREEN);
+    const [currentStep, setCurrentStep] = useState(1);
+
+    // Helper to handle number inputs without leading zeros
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'number' ? (value === '' ? 0 : Number(value)) : value,
+        }));
+    };
+
+    const nextStep = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setCurrentStep(prev => prev + 1);
+    };
+
+    const prevStep = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setCurrentStep(prev => prev - 1);
+    };
+
+    const totalSteps = 4;
+
+    const renderStep1 = () => (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center border-b pb-2">
+                <h3 className="text-xl font-semibold text-gray-800">Basic Profile & Demographics</h3>
+                <span className="text-sm text-gray-400 font-medium">1/{totalSteps}</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                    <input
+                        type="number"
+                        name="age"
+                        value={formData.age || ''}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Country of Residence</label>
+                    <input type="text" name="country" placeholder="e.g. USA, Canada, UK" value={formData.country} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Primary Currency</label>
+                    <input type="text" name="currency" value={formData.currency} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Housing Status</label>
+                    <select
+                        name="housingStatus"
+                        value={formData.housingStatus}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                    >
+                        {housingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Investment Knowledge (1-10)
+                    <span className="text-xs text-gray-500 ml-2">(1 = Novice, 10 = Expert)</span>
+                </label>
+                <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    name="investmentKnowledge"
+                    value={formData.investmentKnowledge}
+                    onChange={handleInputChange}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <div className="text-center font-bold text-blue-600 mt-2">{formData.investmentKnowledge}</div>
+            </div>
+        </div>
+    );
+
+    const renderStep2 = () => (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center border-b pb-2">
+                <h3 className="text-xl font-semibold text-gray-800">Financial Health Check</h3>
+                <span className="text-sm text-gray-400 font-medium">2/{totalSteps}</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Approx. Annual Income</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-gray-400">$</span>
+                        <input
+                            type="number"
+                            name="annualIncome"
+                            value={formData.annualIncome || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-3 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Investable Amount</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-gray-400">$</span>
+                        <input
+                            type="number"
+                            name="monthlyInvestmentCapacity"
+                            value={formData.monthlyInvestmentCapacity || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-3 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Current Savings/Investments</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-gray-400">$</span>
+                        <input
+                            type="number"
+                            name="existingSavings"
+                            value={formData.existingSavings || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-3 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sources of Passive Income</label>
+                <input type="text" name="passiveIncomeDetails" placeholder="e.g. Rental property ($1k/mo), Dividends..." value={formData.passiveIncomeDetails} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-800">
@@ -42,110 +178,51 @@ const App: React.FC = () => {
 
             <main className="flex-grow container mx-auto px-4 py-8 max-w-3xl">
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-2">
-                        Financial Advisor
-                    </h1>
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-2">Financial Advisor</h1>
                     <p className="text-slate-600">Advanced AI-Powered Investment Strategy & Forecasting</p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 p-8">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">
-                        Phase 4: Core Components Complete! ✅
-                    </h2>
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-100 h-2">
+                        <div
+                            className="bg-blue-600 h-2 transition-all duration-500 ease-out"
+                            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                        ></div>
+                    </div>
 
-                    {/* Component Demos */}
-                    <div className="space-y-8">
-
-                        {/* Traffic Light Demo */}
-                        <div className="border border-slate-200 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-slate-700 mb-4">🚦 Traffic Light Component</h3>
-                            <div className="flex flex-wrap items-center justify-center gap-8">
-                                <div className="text-center">
-                                    <TrafficLight status={FeasibilityStatus.RED} />
-                                    <p className="mt-2 text-sm text-red-600 font-medium">RED - Unrealistic</p>
-                                </div>
-                                <div className="text-center">
-                                    <TrafficLight status={FeasibilityStatus.YELLOW} />
-                                    <p className="mt-2 text-sm text-yellow-600 font-medium">YELLOW - Challenging</p>
-                                </div>
-                                <div className="text-center">
-                                    <TrafficLight status={FeasibilityStatus.GREEN} />
-                                    <p className="mt-2 text-sm text-green-600 font-medium">GREEN - On Track</p>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 text-center">
-                                <p className="text-slate-600 text-sm">Interactive Demo:</p>
-                                <div className="flex justify-center gap-4 mt-2">
-                                    <button
-                                        onClick={() => setSelectedStatus(FeasibilityStatus.RED)}
-                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                    >
-                                        Set RED
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedStatus(FeasibilityStatus.YELLOW)}
-                                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
-                                    >
-                                        Set YELLOW
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedStatus(FeasibilityStatus.GREEN)}
-                                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                                    >
-                                        Set GREEN
-                                    </button>
-                                </div>
-                                <div className="mt-4">
-                                    <p className="text-slate-700">Current Status: <span className="font-bold">{selectedStatus}</span></p>
-                                    <TrafficLight status={selectedStatus} />
-                                </div>
-                            </div>
+                    <div className="p-6 md:p-8">
+                        <div className="mb-8">
+                            {currentStep === 1 && renderStep1()}
+                            {currentStep === 2 && renderStep2()}
+                            {currentStep === 3 && <div>Step 3 coming in Phase 6...</div>}
+                            {currentStep === 4 && <div>Step 4 coming in Phase 7...</div>}
                         </div>
 
-                        {/* Form Data Preview */}
-                        <div className="border border-slate-200 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-slate-700 mb-4">📊 Current Form Data</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div className="bg-slate-50 p-3 rounded-lg">
-                                    <p className="text-sm text-slate-500">Age</p>
-                                    <p className="font-semibold">{formData.age}</p>
-                                </div>
-                                <div className="bg-slate-50 p-3 rounded-lg">
-                                    <p className="text-sm text-slate-500">Currency</p>
-                                    <p className="font-semibold">{formData.currency}</p>
-                                </div>
-                                <div className="bg-slate-50 p-3 rounded-lg">
-                                    <p className="text-sm text-slate-500">Knowledge Level</p>
-                                    <p className="font-semibold">{formData.investmentKnowledge}/10</p>
-                                </div>
-                                <div className="bg-slate-50 p-3 rounded-lg">
-                                    <p className="text-sm text-slate-500">Risk Reaction</p>
-                                    <p className="font-semibold text-sm">{formData.reactionToLoss}</p>
-                                </div>
-                                <div className="bg-slate-50 p-3 rounded-lg">
-                                    <p className="text-sm text-slate-500">Target Return</p>
-                                    <p className="font-semibold">{formData.targetAnnualReturn}%</p>
-                                </div>
-                                <div className="bg-slate-50 p-3 rounded-lg">
-                                    <p className="text-sm text-slate-500">Max Loss Tolerance</p>
-                                    <p className="font-semibold">{formData.maxTolerableLoss}%</p>
-                                </div>
-                            </div>
-                        </div>
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                            <button
+                                onClick={prevStep}
+                                disabled={currentStep === 1}
+                                className={`px-6 py-2 rounded-lg font-medium transition-colors ${currentStep === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'}`}
+                            >
+                                Back
+                            </button>
 
-                        {/* Next Phase Info */}
-                        <div className="border border-blue-200 bg-blue-50 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-blue-800 mb-2">🚀 Next Phase: Multi-Step Form</h3>
-                            <p className="text-blue-700">
-                                Phase 5: We'll build the multi-step financial form with 4 steps:
-                            </p>
-                            <ul className="list-disc pl-5 mt-2 text-blue-700">
-                                <li>Step 1: Basic Profile & Demographics</li>
-                                <li>Step 2: Financial Health Check</li>
-                                <li>Step 3: Goals & Aspirations</li>
-                                <li>Step 4: Risk Profile & Context</li>
-                            </ul>
+                            {currentStep < totalSteps ? (
+                                <button
+                                    onClick={nextStep}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-200 transition-all hover:translate-y-px"
+                                >
+                                    Next Step
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => alert('Submit functionality in Phase 8')}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-green-200 transition-all hover:translate-y-px"
+                                >
+                                    Generate Analysis
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
