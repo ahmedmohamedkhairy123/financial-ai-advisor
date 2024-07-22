@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CopyrightHeader } from './components/CopyrightHeader';
 import { FooterDisclaimer } from './components/FooterDisclaimer';
-import { FinancialFormData, LossReaction } from './types';
+import { FinancialFormData, LossReaction, DebtOptions } from './types';
 
 // Initial state for the form - EXACTLY like your original
 const initialFormData: FinancialFormData = {
@@ -32,6 +32,7 @@ const initialFormData: FinancialFormData = {
 };
 
 const housingOptions = ["Homeowner", "Renting", "Living with family"];
+const goalOptions = ["Retirement", "Buying a Home", "Wealth Accumulation", "Education Fund", "Starting a Business"];
 
 const App: React.FC = () => {
     const [formData, setFormData] = useState<FinancialFormData>(initialFormData);
@@ -44,6 +45,22 @@ const App: React.FC = () => {
             ...prev,
             [name]: type === 'number' ? (value === '' ? 0 : Number(value)) : value,
         }));
+    };
+
+    // Custom select change handler for "Other" option
+    const handleCustomSelectChange = (field: keyof FinancialFormData, value: string, standardOptions: readonly string[]) => {
+        if (value === 'Other_Input') {
+            // Set to empty string if it was previously a standard option
+            if (standardOptions.includes(formData[field] as string)) {
+                setFormData(prev => ({ ...prev, [field]: '' }));
+            }
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
+    };
+
+    const isCustomValue = (value: string, standardOptions: readonly string[]) => {
+        return !standardOptions.includes(value) && value !== '';
     };
 
     const nextStep = () => {
@@ -87,13 +104,22 @@ const App: React.FC = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Housing Status</label>
                     <select
-                        name="housingStatus"
-                        value={formData.housingStatus}
-                        onChange={handleInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                        value={housingOptions.includes(formData.housingStatus) ? formData.housingStatus : 'Other_Input'}
+                        onChange={(e) => handleCustomSelectChange('housingStatus', e.target.value, housingOptions)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2"
                     >
                         {housingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        <option value="Other_Input">Other...</option>
                     </select>
+                    {(!housingOptions.includes(formData.housingStatus)) && (
+                        <input
+                            type="text"
+                            placeholder="Please specify housing status..."
+                            value={formData.housingStatus}
+                            onChange={(e) => setFormData(prev => ({ ...prev, housingStatus: e.target.value }))}
+                            className="w-full p-3 border border-blue-300 bg-blue-50 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    )}
                 </div>
             </div>
 
@@ -163,11 +189,151 @@ const App: React.FC = () => {
                         />
                     </div>
                 </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Debt Situation</label>
+                    <select
+                        value={DebtOptions.includes(formData.currentDebtSituation as any) ? formData.currentDebtSituation : 'Other_Input'}
+                        onChange={(e) => handleCustomSelectChange('currentDebtSituation', e.target.value, DebtOptions)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2"
+                    >
+                        {DebtOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                        <option value="Other_Input">Other...</option>
+                    </select>
+                    {(!DebtOptions.includes(formData.currentDebtSituation as any)) && (
+                        <input
+                            type="text"
+                            placeholder="Please specify debt situation..."
+                            value={formData.currentDebtSituation}
+                            onChange={(e) => setFormData(prev => ({ ...prev, currentDebtSituation: e.target.value }))}
+                            className="w-full p-3 border border-blue-300 bg-blue-50 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    )}
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Outstanding Loans/Debts Details</label>
+                <textarea name="outstandingLoansDetails" rows={2} placeholder="e.g. $20k Student loan @ 5%, Car loan $10k..." value={formData.outstandingLoansDetails} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Do you have an emergency fund?</label>
+                    <select name="hasEmergencyFund" value={formData.hasEmergencyFund} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="Yes">Yes, fully funded</option>
+                        <option value="Partial">Partially funded</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Required Emergency Fund (Estimate)</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-gray-400">$</span>
+                        <input
+                            type="number"
+                            name="emergencyFundAmount"
+                            value={formData.emergencyFundAmount || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-3 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                </div>
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Sources of Passive Income</label>
                 <input type="text" name="passiveIncomeDetails" placeholder="e.g. Rental property ($1k/mo), Dividends..." value={formData.passiveIncomeDetails} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+        </div>
+    );
+
+    const renderStep3 = () => (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center border-b pb-2">
+                <h3 className="text-xl font-semibold text-gray-800">Goals & Aspirations</h3>
+                <span className="text-sm text-gray-400 font-medium">3/{totalSteps}</span>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Primary Financial Goal</label>
+                <select
+                    value={goalOptions.includes(formData.primaryGoal) ? formData.primaryGoal : 'Other_Input'}
+                    onChange={(e) => handleCustomSelectChange('primaryGoal', e.target.value, goalOptions)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2"
+                >
+                    {goalOptions.map(g => <option key={g} value={g}>{g}</option>)}
+                    <option value="Other_Input">Other...</option>
+                </select>
+                {(!goalOptions.includes(formData.primaryGoal)) && (
+                    <input
+                        type="text"
+                        placeholder="Please specify your goal..."
+                        value={formData.primaryGoal}
+                        onChange={(e) => setFormData(prev => ({ ...prev, primaryGoal: e.target.value }))}
+                        className="w-full p-3 border border-blue-300 bg-blue-50 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount needed</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-gray-400">$</span>
+                        <input
+                            type="number"
+                            name="targetInvestmentAmount"
+                            value={formData.targetInvestmentAmount || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-3 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Initial Starting Amount</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-gray-400">$</span>
+                        <input
+                            type="number"
+                            name="initialAmount"
+                            value={formData.initialAmount || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-3 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Horizon (Years)</label>
+                    <input
+                        type="number"
+                        name="targetYears"
+                        value={formData.targetYears || ''}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Planned Major Expenses (Next 24 Months)</label>
+                <textarea name="majorPlannedExpenses" placeholder="e.g. Wedding ($20k), New Car ($30k)..." value={formData.majorPlannedExpenses} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Planned Retirement Age</label>
+                    <input
+                        type="number"
+                        name="retirementAge"
+                        value={formData.retirementAge || ''}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Desired Retirement Lifestyle</label>
+                    <input type="text" name="retirementLifestyle" placeholder="e.g. Travel often, simple life..." value={formData.retirementLifestyle} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
             </div>
         </div>
     );
@@ -195,8 +361,8 @@ const App: React.FC = () => {
                         <div className="mb-8">
                             {currentStep === 1 && renderStep1()}
                             {currentStep === 2 && renderStep2()}
-                            {currentStep === 3 && <div>Step 3 coming in Phase 6...</div>}
-                            {currentStep === 4 && <div>Step 4 coming in Phase 7...</div>}
+                            {currentStep === 3 && renderStep3()}
+                            {currentStep === 4 && <div>Step 4 (Risk Profile) coming in Phase 7...</div>}
                         </div>
 
                         <div className="flex justify-between items-center pt-4 border-t border-gray-100">
@@ -217,7 +383,7 @@ const App: React.FC = () => {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => alert('Submit functionality in Phase 8')}
+                                    onClick={() => alert('Submit and Step 4 coming in Phase 7')}
                                     className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-green-200 transition-all hover:translate-y-px"
                                 >
                                     Generate Analysis

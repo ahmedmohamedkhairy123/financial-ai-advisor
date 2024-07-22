@@ -1,3 +1,5 @@
+import { Type } from "@google/genai";
+
 export enum FeasibilityStatus {
     RED = "RED",
     YELLOW = "YELLOW",
