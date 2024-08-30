@@ -3,7 +3,7 @@ import { CopyrightHeader } from './components/CopyrightHeader';
 import { FooterDisclaimer } from './components/FooterDisclaimer';
 import { FinancialFormData, LossReaction, DebtOptions } from './types';
 
-// Initial state for the form - EXACTLY like your original
+// Initial state for the form
 const initialFormData: FinancialFormData = {
     age: 30,
     country: '',
@@ -36,6 +36,7 @@ const goalOptions = ["Retirement", "Buying a Home", "Wealth Accumulation", "Educ
 
 const App: React.FC = () => {
     const [formData, setFormData] = useState<FinancialFormData>(initialFormData);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
 
     // Helper to handle number inputs without leading zeros
@@ -47,10 +48,8 @@ const App: React.FC = () => {
         }));
     };
 
-    // Custom select change handler for "Other" option
     const handleCustomSelectChange = (field: keyof FinancialFormData, value: string, standardOptions: readonly string[]) => {
         if (value === 'Other_Input') {
-            // Set to empty string if it was previously a standard option
             if (standardOptions.includes(formData[field] as string)) {
                 setFormData(prev => ({ ...prev, [field]: '' }));
             }
@@ -59,8 +58,13 @@ const App: React.FC = () => {
         }
     };
 
-    const isCustomValue = (value: string, standardOptions: readonly string[]) => {
-        return !standardOptions.includes(value) && value !== '';
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        // Simulate API call
+        setTimeout(() => {
+            alert('AI Integration coming in Phase 8!\nForm data submitted successfully.');
+            setIsSubmitting(false);
+        }, 1500);
     };
 
     const nextStep = () => {
@@ -338,6 +342,57 @@ const App: React.FC = () => {
         </div>
     );
 
+    const renderStep4 = () => (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center border-b pb-2">
+                <h3 className="text-xl font-semibold text-gray-800">Risk Profile & Context</h3>
+                <span className="text-sm text-gray-400 font-medium">4/{totalSteps}</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Target Annual Return (%)</label>
+                    <input
+                        type="number"
+                        name="targetAnnualReturn"
+                        value={formData.targetAnnualReturn || ''}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Tolerable Loss in 1 Year (%)</label>
+                    <input
+                        type="number"
+                        name="maxTolerableLoss"
+                        value={formData.maxTolerableLoss || ''}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">If your portfolio lost 20% in a month, how would you react?</label>
+                <select name="reactionToLoss" value={formData.reactionToLoss} onChange={handleInputChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                    {Object.values(LossReaction).map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Any other financial context? (Optional)</label>
+                <textarea
+                    name="additionalContext"
+                    rows={4}
+                    placeholder="e.g. Expecting an inheritance, planning to move abroad, specific ethical investment requirements..."
+                    value={formData.additionalContext}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+            </div>
+        </div>
+    );
+
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-800">
             <CopyrightHeader />
@@ -362,7 +417,7 @@ const App: React.FC = () => {
                             {currentStep === 1 && renderStep1()}
                             {currentStep === 2 && renderStep2()}
                             {currentStep === 3 && renderStep3()}
-                            {currentStep === 4 && <div>Step 4 (Risk Profile) coming in Phase 7...</div>}
+                            {currentStep === 4 && renderStep4()}
                         </div>
 
                         <div className="flex justify-between items-center pt-4 border-t border-gray-100">
@@ -383,10 +438,19 @@ const App: React.FC = () => {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => alert('Submit and Step 4 coming in Phase 7')}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-green-200 transition-all hover:translate-y-px"
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-green-200 transition-all hover:translate-y-px flex items-center"
                                 >
-                                    Generate Analysis
+                                    {isSubmitting ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Analyzing...
+                                        </>
+                                    ) : 'Generate Analysis'}
                                 </button>
                             )}
                         </div>
