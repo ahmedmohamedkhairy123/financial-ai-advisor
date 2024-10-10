@@ -197,9 +197,17 @@ const App: React.FC = () => {
     };
 
     const totalSteps = 4;
+    // ✅ ADDED FUNCTION
+    const renderStepIndicator = () => (
+        <div className="flex justify-end mb-4">
+            <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                Step {currentStep}/{totalSteps}
+            </span>
+        </div>
+    );
 
     const renderStep1 = () => (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center border-b pb-2">
                 <h3 className="text-xl font-semibold text-gray-800">Basic Profile & Demographics</h3>
                 <span className="text-sm text-gray-400 font-medium">1/{totalSteps}</span>
@@ -284,7 +292,7 @@ const App: React.FC = () => {
     );
 
     const renderStep2 = () => (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center border-b pb-2">
                 <h3 className="text-xl font-semibold text-gray-800">Financial Health Check</h3>
                 <span className="text-sm text-gray-400 font-medium">2/{totalSteps}</span>
@@ -394,7 +402,7 @@ const App: React.FC = () => {
     );
 
     const renderStep3 = () => (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center border-b pb-2">
                 <h3 className="text-xl font-semibold text-gray-800">Goals & Aspirations</h3>
                 <span className="text-sm text-gray-400 font-medium">3/{totalSteps}</span>
@@ -488,7 +496,7 @@ const App: React.FC = () => {
     );
 
     const renderStep4 = () => (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center border-b pb-2">
                 <h3 className="text-xl font-semibold text-gray-800">Risk Profile & Context</h3>
                 <span className="text-sm text-gray-400 font-medium">4/{totalSteps}</span>
@@ -573,7 +581,7 @@ const App: React.FC = () => {
                         ></div>
                     </div>
 
-                    <div className="p-6 md:p-8">
+                    <div className="p-6 md:p-8 animate-fade-in">
                         {error && (
                             <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
                                 {error}
