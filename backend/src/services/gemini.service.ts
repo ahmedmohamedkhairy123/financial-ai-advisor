@@ -47,6 +47,7 @@ interface AIAnalysisResult {
     nextSteps: string[];
 }
 
+// ✅ EXPORTED FUNCTION
 export const analyzeFinancialData = async (formData: FinancialFormData): Promise<AIAnalysisResult> => {
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -148,4 +149,23 @@ export const analyzeFinancialData = async (formData: FinancialFormData): Promise
     }
 
     return JSON.parse(response.text) as AIAnalysisResult;
+};
+
+// ✅ Optional: Test function
+export const testGeminiConnection = async (): Promise<boolean> => {
+    try {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) return false;
+
+        const ai = new GoogleGenAI({ apiKey });
+        await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: "Test connection",
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Gemini connection test failed:', error);
+        return false;
+    }
 };
