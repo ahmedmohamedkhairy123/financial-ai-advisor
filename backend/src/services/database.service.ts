@@ -59,12 +59,13 @@ export class DatabaseService {
         }
     }
 
-    // Get all analyses for a user (future use)
+    // Update the getUserAnalyses method to use proper typing
     static async getUserAnalyses(userId: string, limit: number = 10): Promise<any[]> {
         try {
             return await FinancialAnalysis.find({ userId })
                 .sort({ createdAt: -1 })
-                .limit(limit);
+                .limit(limit)
+                .select('formData.primaryGoal formData.targetInvestmentAmount formData.targetYears analysisResult.feasibilityColor createdAt sessionId');
         } catch (error: any) {
             console.error('❌ Failed to fetch user analyses:', error.message);
             throw error;
