@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { analyzeFinancialData } from '../services/gemini.service';
 import { DatabaseService } from '../services/database.service';
 import { v4 as uuidv4 } from 'uuid';
+import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -77,6 +78,40 @@ router.post('/', async (req, res) => {
     }
 });
 
+// GET /api/analysis/history - Get user's analysis history
+router.get('/history', authenticate, async (req: AuthenticatedRequest, res) => {
+    try {
+        const userId = req.userId;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        // Validate user ID
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                error: 'User ID not found in request'
+            });
+        }
+
+        console.log(`📋 Fetching analysis history for user: ${userId}, limit: ${limit}`);
+
+        const analyses = await DatabaseService.getUserAnalyses(userId, limit);
+
+        res.json({
+            success: true,
+            data: analyses,
+            count: analyses.length,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error: any) {
+        console.error('❌ Error fetching analysis history:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch analysis history',
+            details: error.message
+        });
+    }
+});
+
 // GET /api/analysis/test - Test endpoint
 router.get('/test', (req, res) => {
     res.json({
@@ -84,8 +119,12 @@ router.get('/test', (req, res) => {
         message: 'Financial Advisor API is working!',
         endpoints: {
             analyze: 'POST /api/analysis',
+            history: 'GET /api/analysis/history (authenticated)',
             test: 'GET /api/analysis/test',
             database: 'GET /api/db/stats'
+        },
+        authentication_required: {
+            '/history': 'Requires valid JWT token'
         }
     });
 });
