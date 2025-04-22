@@ -56,31 +56,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [token]);
 
     const login = async (email: string, password: string) => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
+  setIsLoading(true);
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-            const data = await response.json();
+    const data = await response.json();
 
-            if (!data.success) {
-                throw new Error(data.error || 'Login failed');
-            }
+    if (!data.success) {
+      throw new Error(data.error || 'Login failed');
+    }
 
-            const { token: newToken, user: userData } = data.data;
-
-            localStorage.setItem('token', newToken);
-            setToken(newToken);
-            setUser(userData);
-        } catch (error: any) {
-            throw new Error(error.message || 'Login failed');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const { token: newToken, user: userData } = data.data;
+    
+    // ✅ MAKE SURE THESE LINES EXIST:
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    setUser(userData);
+    
+    console.log('✅ Token saved to localStorage:', newToken.substring(0, 20) + '...');
+  } catch (error: any) {
+    throw new Error(error.message || 'Login failed');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
     const register = async (email: string, password: string, fullName: string) => {
         setIsLoading(true);

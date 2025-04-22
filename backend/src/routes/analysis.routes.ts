@@ -83,7 +83,7 @@ router.get('/history', authenticate, async (req: AuthenticatedRequest, res) => {
     try {
         const userId = req.userId;
         const limit = parseInt(req.query.limit as string) || 10;
-
+        
         // Validate user ID
         if (!userId) {
             return res.status(400).json({
@@ -93,9 +93,9 @@ router.get('/history', authenticate, async (req: AuthenticatedRequest, res) => {
         }
 
         console.log(`📋 Fetching analysis history for user: ${userId}, limit: ${limit}`);
-
+        
         const analyses = await DatabaseService.getUserAnalyses(userId, limit);
-
+        
         res.json({
             success: true,
             data: analyses,

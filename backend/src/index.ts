@@ -7,6 +7,7 @@ import { connectDB, getConnectionStatus } from './db/connection';
 import analysisRoutes from './routes/analysis.routes';
 import databaseRoutes from './routes/database.routes';
 import authRoutes from './routes/auth.routes';
+import exportRoutes from './routes/export.routes'; // ✅ ADD
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.options('*', cors(corsOptions));
 
 // ========== OTHER MIDDLEWARE ==========
 app.use(helmet());
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -51,6 +53,7 @@ app.get('/', (req, res) => {
 
 // ========== API ROUTES ==========
 app.use('/api/auth', authRoutes);
+app.use('/api/export', exportRoutes); // ✅ ADD
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/db', databaseRoutes);
 
@@ -61,6 +64,28 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         database: getConnectionStatus() ? 'connected' : 'disconnected'
     });
+});
+
+// ========== DEBUG ROUTE ==========
+app.get('/debug', (req, res) => {
+    const routes: any[] = [];
+    
+    function printRoutes(layer: any, path = '') {
+        if (layer.route) {
+            routes.push({
+                path: path + layer.route.path,
+                methods: Object.keys(layer.route.methods)
+            });
+        } else if (layer.name === 'router' && layer.handle.stack) {
+            layer.handle.stack.forEach((stackItem: any) => {
+                printRoutes(stackItem, path);
+            });
+        }
+    }
+    
+    app._router.stack.forEach(printRoutes);
+    
+    res.json({ routes });
 });
 
 // ========== ERROR HANDLERS ==========

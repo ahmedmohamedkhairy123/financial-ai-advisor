@@ -3,69 +3,55 @@ import { AIAnalysisResult, FinancialFormData } from '../types';
 // Backend API URL (change if deploying)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-export const processFinancialData = async (formData: FinancialFormData): Promise<AIAnalysisResult> => {
-    try {
-        console.log('📤 Sending data to backend:', {
-            age: formData.age,
-            income: formData.annualIncome,
-            target: formData.targetInvestmentAmount
-        });
+export const processFinancialData = async (formData: FinancialFormData): Promise<{data: AIAnalysisResult, sessionId: string}> => { // ✅ Updated return type
+  try {
+    const token = localStorage.getItem('token');
+    
+    console.log('🔑 Sending request with token:', token ? 'YES' : 'NO');
 
-        const response = await fetch(`${API_BASE_URL}/analysis`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        });
+    const response = await fetch(`${API_BASE_URL}/analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify(formData),
+    });
 
-        // Handle HTTP errors
-        if (!response.ok) {
-            let errorMessage = `HTTP error! status: ${response.status}`;
-
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.error || errorData.details || errorMessage;
-            } catch (e) {
-                // If response is not JSON, use status text
-                errorMessage = response.statusText || errorMessage;
-            }
-
-            throw new Error(errorMessage);
-        }
-
-        // Parse successful response
-        const result = await response.json();
-
-        console.log('✅ Backend response received:', result.success ? 'SUCCESS' : 'FAILED');
-
-        if (!result.success) {
-            throw new Error(result.error || 'Analysis failed on server');
-        }
-
-        return result.data as AIAnalysisResult;
-
-    } catch (error: any) {
-        console.error('❌ Backend API call failed:', error.message);
-
-        // Provide user-friendly error messages
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            throw new Error('Cannot connect to the server. Please check if the backend is running on http://localhost:5000');
-        }
-
-        if (error.message.includes('404')) {
-            throw new Error('Server endpoint not found. Please check backend configuration.');
-        }
-
-        if (error.message.includes('500')) {
-            throw new Error('Server error. Please try again later or contact support.');
-        }
-
-        // Re-throw the original error
-        throw error;
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.details || errorMessage;
+      } catch (e) {
+        errorMessage = response.statusText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
     }
-};
 
+    const result = await response.json();
+    
+    console.log('✅ Analysis saved:', result.savedToDatabase ? 'YES' : 'NO');
+    console.log('👤 Session ID:', result.sessionId);
+    
+    // ✅ Return both data and sessionId
+    return {
+      data: result.data as AIAnalysisResult,
+      sessionId: result.sessionId || `session_${Date.now()}`
+    };
+    
+  } catch (error: any) {
+    console.error('❌ Backend API call failed:', error.message);
+    
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      throw new Error('Cannot connect to the server. Please check if the backend is running on http://localhost:5000');
+    }
+    
+    throw error;
+  }
+};
 // Optional: Direct Gemini fallback (for development/testing)
 export const processFinancialDataDirect = async (formData: FinancialFormData): Promise<AIAnalysisResult> => {
     // Only use this if you want a direct fallback during development
