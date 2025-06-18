@@ -14,38 +14,40 @@ interface SaveAnalysisParams {
 export class DatabaseService {
     // Save analysis to database
     static async saveAnalysis(params: SaveAnalysisParams): Promise<any> {
-        try {
-            const {
-                sessionId,
-                userId,
-                formData,
-                analysisResult,
-                processingTime,
-                ipAddress,
-                userAgent,
-            } = params;
+  try {
+    const {
+      sessionId,
+      userId, // ✅ This can be null for guests
+      formData,
+      analysisResult,
+      processingTime,
+      ipAddress,
+      userAgent,
+    } = params;
 
-            const analysis = new FinancialAnalysis({
-                sessionId,
-                userId,
-                formData,
-                analysisResult,
-                metadata: {
-                    ipAddress,
-                    userAgent,
-                    processingTime,
-                },
-            });
+    console.log(`💾 Saving analysis for ${userId ? 'user: ' + userId : 'guest'}`);
+    
+    const analysis = new FinancialAnalysis({
+      sessionId,
+      userId, // ✅ This will be saved as null for guests
+      formData,
+      analysisResult,
+      metadata: {
+        ipAddress,
+        userAgent,
+        processingTime,
+      },
+    });
 
-            const savedAnalysis = await analysis.save();
-            console.log(`💾 Analysis saved to database with ID: ${savedAnalysis._id}`);
-
-            return savedAnalysis;
-        } catch (error: any) {
-            console.error('❌ Failed to save analysis to database:', error.message);
-            throw new Error(`Database save failed: ${error.message}`);
-        }
-    }
+    const savedAnalysis = await analysis.save();
+    console.log(`✅ Analysis saved with ID: ${savedAnalysis._id}, User: ${savedAnalysis.userId || 'guest'}`);
+    
+    return savedAnalysis;
+  } catch (error: any) {
+    console.error('❌ Failed to save analysis to database:', error.message);
+    throw new Error(`Database save failed: ${error.message}`);
+  }
+}
 
     // Get analysis by session ID
     static async getAnalysisBySessionId(sessionId: string): Promise<any | null> {

@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
 
     const handleLogout = () => {
         logout();
-        window.location.href = '/';
+        window.location.href = '/login';
     };
 
     return (

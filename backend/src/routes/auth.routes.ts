@@ -170,11 +170,12 @@ router.get('/me', authenticate, async (req: AuthenticatedRequest, res) => {
 });
 
 // POST /api/auth/logout - Logout (client-side)
-router.post('/logout', authenticate, (req: AuthenticatedRequest, res) => {
-    res.json({
-        success: true,
-        message: 'Logout successful',
-    });
+// POST /api/auth/logout - Logout (client-side token removal)
+router.post('/logout', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logout successful. Remove token client-side.',
+  });
 });
 
 // GET /api/auth/test - Simple test endpoint
