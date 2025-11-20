@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
-
+import { getAnalysisHistory } from '../../services/geminiService';
 interface AnalysisHistory {
     id: string;
     sessionId: string;
@@ -19,32 +19,48 @@ const Dashboard: React.FC = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchHistory = async () => {
+        // Get history from localStorage instead of backend API
+        const fetchLocalHistory = () => {
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:5000/api/analysis/history', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                // Import the function we created in geminiService.ts
+                const history = getAnalysisHistory();
+
+                // Filter for current user if logged in
+                const userHistory = history.filter((item: any) => {
+                    if (!user) {
+                        // Show guest analyses when not logged in
+                        return item.userId === 'guest';
+                    }
+                    // Show user's analyses when logged in
+                    return item.userId === user.id || item.userId === 'guest';
                 });
 
-                const data = await response.json();
+                // Transform to match the expected format
+                const formattedHistory = userHistory.map((item: any) => ({
+                    id: item.id,
+                    sessionId: item.id,
+                    goal: item.formData?.primaryGoal || 'Financial Analysis',
+                    amount: item.formData?.targetInvestmentAmount || 0,
+                    years: item.formData?.targetYears || 0,
+                    feasibility: item.result?.feasibilityColor || 'YELLOW',
+                    createdAt: item.timestamp || new Date().toISOString(),
+                }));
 
-                if (data.success) {
-                    setHistory(data.data);
-                } else {
-                    setError(data.error || 'Failed to load history');
+                setHistory(formattedHistory);
+
+                if (formattedHistory.length === 0) {
+                    setError('No analysis history yet. Create your first analysis!');
                 }
             } catch (err: any) {
-                setError('Failed to load analysis history');
-                console.error(err);
+                console.error('Failed to load history:', err);
+                setError('Failed to load analysis history from local storage');
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchHistory();
-    }, []);
+        fetchLocalHistory();
+    }, [user]); // Add user to dependency array
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {

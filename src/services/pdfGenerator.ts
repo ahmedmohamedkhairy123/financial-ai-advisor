@@ -1,0 +1,195 @@
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
+interface AnalysisData {
+    feasibilityColor: string;
+    feasibilityTitle: string;
+    feasibilityExplanation: string;
+    executiveSummary: string;
+    projectedOutcome: string;
+    investmentStrategy: Array<{
+        title: string;
+        allocationPercentage?: number;
+        description: string;
+        assets: string[];
+    }>;
+    riskAssessment: string;
+    nextSteps: string[];
+}
+
+export const generatePDF = async (analysisData: AnalysisData, elementId: string = 'report-content'): Promise<void> => {
+    try {
+        // Method 1: Capture HTML element (better quality)
+        const element = document.getElementById(elementId);
+        if (element) {
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 190;
+            const pageHeight = 290;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 10;
+
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save(`financial-report-${Date.now()}.pdf`);
+            return;
+        }
+
+        // Method 2: Generate PDF from scratch (fallback)
+        generatePDFFromScratch(analysisData);
+
+    } catch (error) {
+        console.error('PDF generation failed:', error);
+        // Fallback to simple PDF
+        generateSimplePDF(analysisData);
+    }
+};
+
+const generatePDFFromScratch = (data: AnalysisData) => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    let yPos = 20;
+    const margin = 20;
+    const pageWidth = 210;
+    const textWidth = pageWidth - (2 * margin);
+
+    // Title
+    pdf.setFontSize(24);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Financial Analysis Report', margin, yPos);
+    yPos += 15;
+
+    // Date
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`Generated: ${new Date().toLocaleDateString()}`, margin, yPos);
+    yPos += 15;
+
+    // Feasibility
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`Status: ${data.feasibilityTitle}`, margin, yPos);
+    yPos += 10;
+
+    pdf.setFontSize(12);
+    pdf.text(data.feasibilityExplanation, margin, yPos, { maxWidth: textWidth });
+    yPos += 20;
+
+    // Executive Summary
+    yPos = addSection(pdf, 'Executive Summary', data.executiveSummary, margin, yPos, textWidth) + 8;
+
+    // Check page break
+    if (yPos > 250) {
+        pdf.addPage();
+        yPos = 20;
+    }
+
+    // Projected Outcome
+    yPos = addSection(pdf, 'Projected Outcome', data.projectedOutcome, margin, yPos, textWidth) + 8;
+
+    // Investment Strategy
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Investment Strategy', margin, yPos);
+    yPos += 10;
+
+    data.investmentStrategy.forEach((strategy, index) => {
+        if (yPos > 250) {
+            pdf.addPage();
+            yPos = 20;
+        }
+
+        pdf.setFontSize(12);
+        pdf.setTextColor(50, 50, 50);
+        pdf.text(`${strategy.title} (${strategy.allocationPercentage || 0}%)`, margin + 5, yPos);
+        yPos += 7;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        const lines = pdf.splitTextToSize(strategy.description, textWidth - 10);
+        pdf.text(lines, margin + 10, yPos);
+        yPos += (lines.length * 5) + 5;
+
+        if (strategy.assets.length > 0) {
+            pdf.setFontSize(9);
+            pdf.setTextColor(80, 80, 80);
+            pdf.text(`Assets: ${strategy.assets.join(', ')}`, margin + 10, yPos);
+            yPos += 7;
+        }
+        yPos += 5;
+    });
+
+    // Risk Assessment
+    if (yPos > 200) {
+        pdf.addPage();
+        yPos = 20;
+    }
+
+    yPos = addSection(pdf, 'Risk Assessment', data.riskAssessment, margin, yPos, textWidth) + 8;
+
+    // Next Steps
+    if (yPos > 200) {
+        pdf.addPage();
+        yPos = 20;
+    }
+
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Action Plan', margin, yPos);
+    yPos += 10;
+
+    pdf.setFontSize(11);
+    data.nextSteps.forEach((step, index) => {
+        if (yPos > 250) {
+            pdf.addPage();
+            yPos = 20;
+        }
+        pdf.text(`• ${step}`, margin + 5, yPos);
+        yPos += 7;
+    });
+
+    // Footer
+    pdf.setFontSize(8);
+    pdf.setTextColor(150, 150, 150);
+    pdf.text('Generated by Financial Advisor AI • For educational purposes only', margin, 290);
+
+    pdf.save(`financial-report-${Date.now()}.pdf`);
+};
+
+const addSection = (pdf: jsPDF, title: string, content: string, x: number, y: number, maxWidth: number) => {
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(title, x, y);
+    y += 7;
+
+    pdf.setFontSize(11);
+    pdf.setTextColor(80, 80, 80);
+    const lines = pdf.splitTextToSize(content, maxWidth);
+    pdf.text(lines, x, y);
+
+    return y + (lines.length * 5);
+};
+
+const generateSimplePDF = (data: AnalysisData) => {
+    const pdf = new jsPDF();
+    pdf.text(`Financial Report: ${data.feasibilityTitle}`, 20, 20);
+    pdf.text(data.executiveSummary.substring(0, 200), 20, 30);
+    pdf.save(`simple-report-${Date.now()}.pdf`);
+};
+
+// Install required packages:
+// npm install jspdf html2canvas
