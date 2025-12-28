@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generatePDF } from '../../services/pdfGenerator';
+import { generatePDF, prepareForPDFCapture, restoreAfterPDFCapture } from '../../services/pdfGenerator';
 
 interface ExportButtonsProps {
   sessionId: string;
@@ -36,10 +36,25 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ sessionId, analysisData }
     }, 1000);
   };
 
+  // In your ExportButtons.tsx, update the PDF export function:
   const handlePDFExport = async () => {
     try {
+      // Prepare the report for better PDF capture
+      if (typeof prepareForPDFCapture === 'function') {
+        prepareForPDFCapture();
+      }
+
+      // Wait a bit for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       await generatePDF(analysisData, 'report-content');
-      setMessage('PDF downloaded successfully!');
+
+      // Restore styles
+      if (typeof restoreAfterPDFCapture === 'function') {
+        restoreAfterPDFCapture();
+      }
+
+      setMessage('Beautiful PDF downloaded successfully! 🎨');
       setMessageType('success');
     } catch (error) {
       setMessage('Failed to generate PDF. Please try again.');
@@ -139,7 +154,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ sessionId, analysisData }
           <p>• PDF: Full report with professional formatting</p>
           <p>• CSV: Financial data for spreadsheet analysis</p>
           <p>• Share: Copy link to share your analysis</p>
-          <p className="text-blue-600 mt-2">💡 All processing happens in your browser - no backend needed!</p>
+          <p className="text-blue-600 mt-2">💡your analysis is complete</p>
         </div>
       </div>
     </div>

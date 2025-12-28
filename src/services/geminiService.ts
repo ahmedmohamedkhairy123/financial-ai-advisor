@@ -4,7 +4,7 @@ import { AIAnalysisResult, FinancialFormData, FeasibilityStatus } from '../types
 // Direct Gemini API call (no backend needed)
 export const processFinancialData = async (formData: FinancialFormData): Promise<AIAnalysisResult> => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  
+
   if (!apiKey) {
     // For demo mode, return mock data
     console.warn('⚠️ No Gemini API key found, using demo mode');
@@ -77,12 +77,12 @@ export const processFinancialData = async (formData: FinancialFormData): Promise
     }
 
     const result = JSON.parse(response.text) as AIAnalysisResult;
-    
+
     // Save to local history
     saveToLocalHistory(formData, result);
-    
+
     return result;
-    
+
   } catch (error: any) {
     console.error('Gemini API error:', error);
     // Fallback to mock data
@@ -93,11 +93,11 @@ export const processFinancialData = async (formData: FinancialFormData): Promise
 // Mock data for demo mode
 const getMockAnalysis = (formData: FinancialFormData): AIAnalysisResult => {
   const isRealistic = formData.monthlyInvestmentCapacity > 500;
-  
+
   return {
     feasibilityColor: isRealistic ? FeasibilityStatus.GREEN : FeasibilityStatus.YELLOW,
     feasibilityTitle: isRealistic ? "Goal Achievable with Discipline" : "Needs Adjustment",
-    feasibilityExplanation: isRealistic 
+    feasibilityExplanation: isRealistic
       ? `With your current savings rate of $${formData.monthlyInvestmentCapacity}/month, you're on track to reach $${formData.targetInvestmentAmount} in ${formData.targetYears} years.`
       : `To reach $${formData.targetInvestmentAmount} in ${formData.targetYears} years, consider increasing your monthly contributions.`,
     executiveSummary: `You're a ${formData.age}-year-old ${formData.country} resident aiming for ${formData.primaryGoal}. Based on your risk profile, here's a tailored strategy.`,
@@ -150,7 +150,7 @@ const saveToLocalHistory = (formData: FinancialFormData, result: AIAnalysisResul
       result,
       userId: localStorage.getItem('currentUserId') || 'guest'
     };
-    
+
     history.unshift(analysis); // Add to beginning
     localStorage.setItem('financialHistory', JSON.stringify(history.slice(0, 50))); // Keep last 50
   } catch (error) {

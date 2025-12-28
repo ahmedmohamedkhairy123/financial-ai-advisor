@@ -47,3 +47,36 @@
 .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* Better PDF printing styles */
+@media print {
+    #report-content {
+        width: 800px !important;
+        max-width: 800px !important;
+        margin: 0 auto !important;
+        padding: 30px !important;
+        background: white !important;
+    }
+
+    #report-content button,
+    #report-content a,
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+}
+
+.print-optimized {
+    font-family: 'Inter', 'Helvetica', 'Arial', sans-serif !important;
+    line-height: 1.5 !important;
+    color: #1f2937 !important;
+}
+
+/* Ensure charts are visible in PDF */
+.recharts-wrapper,
+.recharts-surface {
+    background: white !important;
+}
