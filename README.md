@@ -1,6 +1,9 @@
 © 2025 Financial AI Advisor - Full Stack Application - All Rights Reserved
 #### for techinal guidelines or inquires please contact ahmedmohamedkhairy123@gmail.com
-# 
+### 📋Statement of originality
+#### This project is entirely **my own original work**,developed from scratch 
+#### **No plagiarism**: No part of this repo has been copied from external sources or other developers 
+#### **Full Accountability** I , [Ahmed], assume full legal and professional responsibility for the authenticity of this 
 
 ## 🚀 Project Overview
 An intelligent AI-powered financial planning application that analyzes user financial profiles to provide personalized investment strategies and feasibility assessments using Google's Gemini AI.
