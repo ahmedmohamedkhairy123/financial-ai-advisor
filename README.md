@@ -5,7 +5,7 @@
 ## 🚀 Project Overview
 An intelligent AI-powered financial planning application that analyzes user financial profiles to provide personalized investment strategies and feasibility assessments using Google's Gemini AI.
 ## ❤️ live demo (please wait 5 seconds to see the GIF) 
-![Demo Animation](demo.gif)
+![Demo Animation](Demo2.gif)
 [![Vercel](https://img.shields.io/badge/Vercel-Live%20App-black?style=for-the-badge&logo=vercel)](https://financial-ai-advisor.vercel.app/)
 ## 🏗 Tech Stack
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS
